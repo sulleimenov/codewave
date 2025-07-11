@@ -1,8 +1,10 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 const route = useRoute()
+const authStore = useAuthStore()
 
 const isThemePage = computed(
 	() =>
@@ -10,14 +12,16 @@ const isThemePage = computed(
 		route.name === 'lesson_criterion' ||
 		route.name === 'lesson_testing' ||
 		route.name === 'homework_view' ||
-		route.name === 'homework_check'
+		route.name === 'homework_check' ||
+		route.name === 'lection_show' ||
+		route.name === 'lection_create'
 )
 const isModulesPage = computed(() => route.name === 'Модули')
 
 const completedStages = ref({
 	'Критерий оценивания': false,
 	'Домашнее задание': true,
-	Лекция: false,
+	Лекция: true,
 	Тестирование: true,
 	'Практическое задание': false,
 	Рефлексия: false
@@ -61,19 +65,31 @@ const links = computed(() => {
 				extraClass: completedStages.value['Критерий оценивания'] ? '' : 'text-gray-400 saturate-0'
 			},
 			{
-				to: 'homework',
+				to: {
+					name: authStore.role === 'admin' ? 'homework_check' : 'homework_view',
+					params: {
+						subject_id: route.params.subject_id,
+						topic_id: route.params.topic_id
+					}
+				},
 				icon: 'homework.svg',
 				label: 'Домашнее задание',
 				extraClass: completedStages.value['Домашнее задание'] ? '' : 'text-gray-400 saturate-0'
 			},
 			{
-				to: '#',
+				to: 'lection_show',
 				icon: 'book.svg',
 				label: 'Лекция',
 				extraClass: completedStages.value['Лекция'] ? '' : 'text-gray-400 saturate-0'
 			},
 			{
-				to: 'testing',
+				to: {
+					name: 'lesson_testing',
+					params: {
+						subject_id: route.params.subject_id,
+						topic_id: route.params.topic_id
+					}
+				},
 				icon: 'test.svg',
 				label: 'Тестирование',
 				extraClass: completedStages.value['Тестирование'] ? '' : 'text-gray-400 saturate-0'

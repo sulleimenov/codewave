@@ -5,7 +5,7 @@
 
 	<div v-else-if="loading" class="text-center py-8">Загрузка теста...</div>
 
-	<div v-else-if="error" class="text-center py-8 text-red-500">Ошибка: {{ error }}</div>
+	<div v-else-if="error" class="text-center py-8 text-red-500">Тест не существует</div>
 
 	<div v-else-if="questions.length === 0" class="text-center py-8">Тест не содержит вопросов</div>
 

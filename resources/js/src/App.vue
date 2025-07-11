@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import Header from '@/components/TheHeader.vue'
 import Sidebar from '@/components/TheSidebar.vue'
 import Navigation from '@/components/Navigation.vue'
+import 'highlight.js/styles/monokai.css'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -22,7 +23,6 @@ const isLoginPage = computed(() => router.currentRoute.value.name === 'login')
 			<Sidebar />
 			<main class="basis-full">
 				<div class="flex justify-between items-center mb-7 h-10">
-					<!-- <button @click="$router.go(-1)">Вернуться назад</button> -->
 					<h1 class="text-xl">{{ router.currentRoute.value.meta.title }}</h1>
 					<Navigation />
 				</div>

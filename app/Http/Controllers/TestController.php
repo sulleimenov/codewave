@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\Answer;
 use App\Models\TestResult;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class TestController extends Controller
@@ -134,34 +135,41 @@ class TestController extends Controller
             'details' => $results,
         ]);
     }
-
     public function createTest(Request $request)
     {
+        // Логируем входные данные для отладки
+        \Log::info('Request data:', $request->all());
+
+        // Валидация запроса (убрали questions.*.type)
         $request->validate([
             'topic_id' => 'required|exists:topics,id',
+            'title' => 'required|string',
+            'user_id' => 'required|exists:users,id',
             'questions' => 'required|array|min:1',
             'questions.*.title' => 'required|string',
-            'questions.*.type' => 'required|in:single,multiple,fill-in-the-blank',
             'questions.*.answers' => 'required|array|min:1',
             'questions.*.answers.*.title' => 'required|string',
             'questions.*.answers.*.is_correct' => 'required|boolean',
         ]);
 
-        // Ensure no existing test for the topic
+        // Проверяем, нет ли уже теста для данной темы
         $existingTest = Test::where('topic_id', $request->topic_id)->first();
         if ($existingTest) {
             return response()->json(['error' => 'Test already exists for this topic'], 400);
         }
 
+        // Создаем тест
         $test = Test::create([
             'topic_id' => $request->topic_id,
+            'title' => $request->title,
+            'user_id' => $request->user_id,
         ]);
 
         foreach ($request->questions as $q) {
             $question = Question::create([
                 'test_id' => $test->id,
                 'title' => $q['title'],
-                'type' => $q['type'],
+                // Поле type удалено
             ]);
 
             foreach ($q['answers'] as $answer) {
@@ -176,7 +184,6 @@ class TestController extends Controller
         $test->load('questions.answers');
         return response()->json(['test' => $test], 201);
     }
-
     public function deleteTest($test_id)
     {
         $test = Test::find($test_id);

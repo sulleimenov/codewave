@@ -13,6 +13,8 @@ import TestingCreate from '@/views/testing/TestingCreate.vue'
 import TestingView from '@/views/testing/TestingView.vue'
 import HomeworkView from '@/views/homework/HomeworkView.vue'
 import HomeworkCheck from '@/views/homework/HomeworkCheck.vue'
+import LectionShow from '../views/lections/LectionShow.vue'
+import LectionCreate from '../views/lections/LectionCreate.vue'
 
 const routes = [
 	{ path: '/', name: 'login', component: Login },
@@ -73,10 +75,7 @@ const routes = [
 	{
 		path: '/subjects/:subject_id/topic/:topic_id/testing',
 		name: 'lesson_testing',
-		component: () => {
-			const authStore = useAuthStore()
-			return authStore.isAdmin ? TestingCreate : TestingView
-		},
+		component: () => import('../views/testing/TestingRouter.vue'), // Новый компонент-роутер
 		meta: { requiresAuth: true, title: 'Тестирование' }
 	},
 	{
@@ -90,6 +89,18 @@ const routes = [
 		name: 'homework_check',
 		component: HomeworkCheck,
 		meta: { requiresAuth: true, title: 'Домашнее задание' }
+	},
+	{
+		path: '/subjects/:subject_id/topic/:topic_id/lection_show',
+		name: 'lection_view',
+		component: () => import('@/views/lections/LectionView.vue'),
+		meta: { requiresAuth: true, title: 'Просмотр лекции' }
+	},
+	{
+		path: '/subjects/:subject_id/topic/:topic_id/lection_create',
+		name: 'lection_create',
+		component: () => import('@/views/lections/LectionCreate.vue'),
+		meta: { requiresAuth: true, title: 'Лекция' }
 	}
 ]
 
@@ -98,11 +109,18 @@ const router = createRouter({
 	routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
 	const authStore = useAuthStore()
 	if (to.meta.requiresAuth && !authStore.isAuthenticated) {
 		next({ name: 'login' })
 	} else {
+		if (to.meta.requiresAuth && !authStore.role) {
+			try {
+				await authStore.getProfile()
+			} catch (e) {
+				next({ name: 'login' })
+			}
+		}
 		next()
 	}
 })

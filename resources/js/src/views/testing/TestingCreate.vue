@@ -108,7 +108,7 @@
 						<input
 							v-model="newQuestion.text"
 							type="text"
-							class="border w-full border-gray-200 bg-gray-50 rounded py-2 px-3"
+							class="borderuft w-full border-gray-200 bg-gray-50 rounded py-2 px-3"
 							placeholder="Введите текст вопроса"
 						/>
 					</div>
@@ -292,6 +292,11 @@ const submitTest = async () => {
 		return
 	}
 
+	if (!authStore.user?.id) {
+		error.value = 'Пользователь не аутентифицирован'
+		return
+	}
+
 	if (questions.value.length === 0) {
 		error.value = 'Добавьте хотя бы один вопрос'
 		return
@@ -334,9 +339,11 @@ const submitTest = async () => {
 
 	saving.value = true
 	try {
+		console.log('authStore.user.iauthStore.user.id,', authStore.user.id)
 		const response = await axios.post('/tests', {
 			topic_id: route.params.topic_id,
 			title: testTitle.value,
+			user_id: authStore.user.id, // Передаем user_id из authStore
 			questions: questions.value.map((q) => ({
 				title: q.text,
 				type: q.type,
@@ -354,6 +361,7 @@ const submitTest = async () => {
 		testTitle.value = ''
 		error.value = null
 	} catch (err) {
+		console.error('Error response:', err.response)
 		error.value = err.response?.data?.message || 'Ошибка при сохранении теста'
 	} finally {
 		saving.value = false

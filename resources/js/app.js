@@ -1,18 +1,16 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-// import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
-
 import App from './src/App.vue'
 import router from '@/router'
-
 import '../css/main.css'
 import IsAdmin from './src/components/ui/isAdmin'
+import Markdown from 'vue3-markdown-it'
 
 const pinia = createPinia()
-const app = createApp(App)
 
-// app.use(autoAnimatePlugin)
+const app = createApp(App)
 app.use(pinia)
 app.use(router)
-app.directive('admin', IsAdmin);
+app.use(Markdown)
+app.directive('admin', IsAdmin)
 app.mount('#app')

@@ -7,7 +7,8 @@ export const useAuthStore = defineStore('auth', {
 		token: localStorage.getItem('authToken') || null,
 		loading: false,
 		error: null,
-		isAdmin: true
+		isAdmin: true,
+		role: ''
 	}),
 	getters: {
 		isAuthenticated: (state) => !!state.token,
@@ -51,7 +52,9 @@ export const useAuthStore = defineStore('auth', {
 				const response = await axios.get('/api/profile')
 
 				this.user = response.data.user
-				this.isAdmin = true // response.data.user.role === 'admin'
+				this.isAdmin = true //response.data.user.role === 'admin'
+				this.role = response.data.user.role
+				console.log('role + ', response.data.user.role)
 			} catch (error) {
 				this.error = error.response?.data?.message || 'Ошибка при получении профиля'
 				this.logout() // Очистка данных при ошибке

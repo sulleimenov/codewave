@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Test extends Model
 {
-    protected $fillable = ['topic_id', 'id', 'title'];
+    protected $fillable = ['topic_id', 'id', 'title', 'user_id'];
 
     public function topic(): BelongsTo
     {

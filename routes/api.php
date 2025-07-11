@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LectionController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,12 @@ Route::get('/topics/{topic}/test', [TestController::class, 'getTestByTopic']);
 Route::post('/tests/{test}/results', [TestController::class, 'submitTest']);
 Route::post('/tests', [TestController::class, 'createTest']);
 Route::delete('/tests/{test_id}', [TestController::class, 'deleteTest']);
+
+Route::get('/subjects/{subject}/lection', [LectionController::class, 'show']);
+Route::post('/lections', [LectionController::class, 'store']);
+
+
 Route::get('/topics/{topic_id}/criteria', [CriteriaController::class, 'index']);
 Route::post('/topics/{topic_id}/criteria', [CriteriaController::class, 'store']);
 Route::delete('/topics/{topic_id}/criteria/{id}', [CriteriaController::class, 'destroy']);
+
