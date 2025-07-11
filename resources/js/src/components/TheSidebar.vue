@@ -1,11 +1,13 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 const route = useRoute()
 const authStore = useAuthStore()
-
+onMounted(() => {
+	console.log(route.name, 'ewq')
+})
 const isThemePage = computed(
 	() =>
 		route.name === 'lesson_detail_description' ||
@@ -19,6 +21,7 @@ const isThemePage = computed(
 const isModulesPage = computed(() => route.name === 'Модули')
 
 const completedStages = ref({
+	Команда: true,
 	'Критерий оценивания': false,
 	'Домашнее задание': true,
 	Лекция: true,
@@ -94,6 +97,14 @@ const links = computed(() => {
 				label: 'Тестирование',
 				extraClass: completedStages.value['Тестирование'] ? '' : 'text-gray-400 saturate-0'
 			},
+			// {
+			// 	to: {
+			// 		name: 'command'
+			// 	},
+			// 	icon: 'test.svg',
+			// 	label: 'Команда',
+			// 	extraClass: completedStages.value['Команда'] ? '' : 'text-gray-400 saturate-0'
+			// },
 			{
 				to: '#',
 				icon: 'practical.svg',
@@ -125,5 +136,10 @@ const links = computed(() => {
 			<img :src="`/icons/${link.icon}`" :alt="`${link.label}`" />
 			<span>{{ link.label }}</span>
 		</router-link>
+		<a
+			href="/subjects/1/topic/1/command"
+			class="flex gap-2 py-3 px-6 hover:bg-gray-50 transition-colors"
+			><img src="/icons/test.svg" alt="Команда" /><span>Команда</span></a
+		>
 	</aside>
 </template>

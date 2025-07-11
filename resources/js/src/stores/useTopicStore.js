@@ -10,6 +10,19 @@ export const useTopicsStore = defineStore('topics', {
 		totalTopics: (state) => state.topics.length
 	},
 	actions: {
+		async getTopic(subjectId, topicId) {
+			try {
+				const response = await axios.get(`/api/subjects/${subjectId}/topics/${topicId}`, {
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('authToken')}`
+					}
+				})
+				return response.data.topic
+			} catch (error) {
+				console.error('Error fetching topic:', error)
+				return null
+			}
+		},
 		async getTopics(subjectId) {
 			try {
 				this.loading = true

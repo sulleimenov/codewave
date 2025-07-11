@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommandController;
 use App\Http\Controllers\LectionController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
@@ -48,9 +49,18 @@ Route::delete('/tests/{test_id}', [TestController::class, 'deleteTest']);
 
 Route::get('/subjects/{subject}/lection', [LectionController::class, 'show']);
 Route::post('/lections', [LectionController::class, 'store']);
+Route::delete('/lections/{subject_id}/{topic_id}', [LectionController::class, 'destroy']);
 
+Route::get('/subjects/{subject_id}/topic/{topic_id}/lection_show', [LectionController::class, 'find']);
 
 Route::get('/topics/{topic_id}/criteria', [CriteriaController::class, 'index']);
 Route::post('/topics/{topic_id}/criteria', [CriteriaController::class, 'store']);
 Route::delete('/topics/{topic_id}/criteria/{id}', [CriteriaController::class, 'destroy']);
 
+Route::post('/commands', [CommandController::class, 'store']);
+Route::get('/commands/students', [CommandController::class, 'getStudents']);
+Route::post('/commands/{id}/students', [CommandController::class, 'addStudents']);
+Route::put('/commands/{id}', [CommandController::class, 'update']);
+Route::delete('/commands/{id}', [CommandController::class, 'destroy']);
+Route::get('/subjects/{subject_id}/topic/{topic_id}/command', [CommandController::class, 'show']);
+Route::post('/commands/{id}/upgrade-photo', [CommandController::class, 'upgradePhoto']);

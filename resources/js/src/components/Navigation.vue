@@ -23,8 +23,8 @@ const isTopicDetailPage = computed(() => /^\/subjects\/\d+\/topic\/\d+/.test(rou
 			text="Добавить тему"
 		/>
 		<Link
-			:to="`/subjects/${subjectId}/topic/${topicId}/lection`"
-			v-if="isTopicDetailPage"
+			:to="`/subjects/${subjectId}/topic/${topicId}/lection_show`"
+			v-if="isTopicDetailPage && route.name !== 'lection_show'"
 			text="Просмотреть лекцию"
 		/>
 	</div>

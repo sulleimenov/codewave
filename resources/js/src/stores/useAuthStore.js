@@ -7,13 +7,12 @@ export const useAuthStore = defineStore('auth', {
 		token: localStorage.getItem('authToken') || null,
 		loading: false,
 		error: null,
-		isAdmin: true,
 		role: ''
 	}),
 	getters: {
 		isAuthenticated: (state) => !!state.token,
 		firstname: (state) => (state.user ? state.user.firstname : ''),
-		isAdminPanel: (state) => state.isAdmin === true
+		isAdmin: (state) => state.role === 'admin'
 	},
 	actions: {
 		async login({ username, password }) {
@@ -27,6 +26,7 @@ export const useAuthStore = defineStore('auth', {
 
 				this.token = response.data.token
 				this.user = response.data.user
+				this.role = response.data.user.role
 
 				localStorage.setItem('authToken', this.token)
 				axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
@@ -39,6 +39,7 @@ export const useAuthStore = defineStore('auth', {
 		logout() {
 			this.user = null
 			this.token = null
+			this.role = ''
 			localStorage.removeItem('authToken')
 			delete axios.defaults.headers.common['Authorization']
 		},
@@ -52,12 +53,11 @@ export const useAuthStore = defineStore('auth', {
 				const response = await axios.get('/api/profile')
 
 				this.user = response.data.user
-				this.isAdmin = true //response.data.user.role === 'admin'
 				this.role = response.data.user.role
-				console.log('role + ', response.data.user.role)
+				console.log('role:', response.data.user.role)
 			} catch (error) {
 				this.error = error.response?.data?.message || 'Ошибка при получении профиля'
-				this.logout() // Очистка данных при ошибке
+				this.logout()
 			} finally {
 				this.loading = false
 			}

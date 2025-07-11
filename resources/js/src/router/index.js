@@ -15,6 +15,8 @@ import HomeworkView from '@/views/homework/HomeworkView.vue'
 import HomeworkCheck from '@/views/homework/HomeworkCheck.vue'
 import LectionShow from '../views/lections/LectionShow.vue'
 import LectionCreate from '../views/lections/LectionCreate.vue'
+import CommandView from '@/views/command/CommandView.vue'
+import CommandAdd from '@/views/command/CommandAdd.vue'
 
 const routes = [
 	{ path: '/', name: 'login', component: Login },
@@ -75,7 +77,7 @@ const routes = [
 	{
 		path: '/subjects/:subject_id/topic/:topic_id/testing',
 		name: 'lesson_testing',
-		component: () => import('../views/testing/TestingRouter.vue'), // Новый компонент-роутер
+		component: () => import('../views/testing/TestingRouter.vue'),
 		meta: { requiresAuth: true, title: 'Тестирование' }
 	},
 	{
@@ -92,15 +94,27 @@ const routes = [
 	},
 	{
 		path: '/subjects/:subject_id/topic/:topic_id/lection_show',
-		name: 'lection_view',
-		component: () => import('@/views/lections/LectionView.vue'),
+		name: 'lection_show',
+		component: LectionShow,
 		meta: { requiresAuth: true, title: 'Просмотр лекции' }
 	},
 	{
 		path: '/subjects/:subject_id/topic/:topic_id/lection_create',
 		name: 'lection_create',
-		component: () => import('@/views/lections/LectionCreate.vue'),
+		component: LectionCreate,
 		meta: { requiresAuth: true, title: 'Лекция' }
+	},
+	{
+		path: '/subjects/:subject_id/topic/:topic_id/command',
+		name: 'Command',
+		component: CommandView,
+		meta: { requiresAuth: true, title: 'Команда' }
+	},
+	{
+		path: '/subjects/:subject_id/topic/:topic_id/command_create',
+		name: 'command_create',
+		component: CommandAdd,
+		meta: { requiresAuth: true, title: 'Создание команды' }
 	}
 ]
 
@@ -120,6 +134,9 @@ router.beforeEach(async (to, from, next) => {
 			} catch (e) {
 				next({ name: 'login' })
 			}
+		}
+		if (to.name === 'command_create' && authStore.role !== 'admin') {
+			next({ name: 'Command' })
 		}
 		next()
 	}

@@ -33,7 +33,7 @@ const handleDelete = async (id) => {
 			<div class="basis-1/12">№</div>
 			<div class="basis-full">Тема</div>
 			<div class="basis-2/12">Дата</div>
-			<div class="basis-2/12">Оценка</div>
+			<!-- <div class="basis-2/12">Оценка</div> -->
 		</div>
 		<div>
 			<div
@@ -48,11 +48,11 @@ const handleDelete = async (id) => {
 					<div class="basis-1/12">{{ index + 1 }}</div>
 					<div class="basis-full">{{ topic.name }}</div>
 					<div class="basis-2/12">{{ topic.date }}</div>
-					<div
+					<!-- <div
 						:class="`basis-2/12 ${score >= 90 ? 'text-green-500' : ''} ${score >= 70 && score < 90 ? 'text-orange-500' : ''}`"
 					>
 						{{ score }}
-					</div>
+					</div> -->
 					<!-- <div class="basis-1/12"></div> -->
 				</router-link>
 				<div
