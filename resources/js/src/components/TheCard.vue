@@ -44,19 +44,19 @@ const handleDeleteSubject = async (id) => {
 			</div>
 			<div class="flex gap-5 mt-8 relative">
 				<div class="flex items-center gap-1 uppercase text-xs text-gray-400">
-					<img src="/public/icons/book-gray.svg" alt="Book" />
+					<img src="/icons/book-gray.svg" alt="Book" />
 					{{ subject.lecture }} {{ subject.lecture_count }} Лекции
 				</div>
 				<div class="flex items-center gap-1 uppercase text-xs text-gray-400">
-					<img src="/public/icons/book-gray.svg" alt="Book" />
+					<img src="/icons/book-gray.svg" alt="Book" />
 					{{ subject.practice }} {{ subject.practice_count }} ЛПЗ
 				</div>
 				<div class="flex gap-2 absolute right-0">
 					<RouterLink :to="`/subjects/edit/${subject.id}`">
-						<img src="/public/icons/edit.svg" alt="Редактировать" />
+						<img src="/icons/edit.svg" alt="Редактировать" />
 					</RouterLink>
 					<button @click="handleDeleteSubject(subject.id)">
-						<img src="/public/icons/delete.svg" alt="Удалить" />
+						<img src="/icons/delete.svg" alt="Удалить" />
 					</button>
 				</div>
 			</div>

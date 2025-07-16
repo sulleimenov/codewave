@@ -16,35 +16,35 @@ const shopItems = ref([
 		id: 'standard_bars',
 		name: 'Стандартный барс',
 		price: 0,
-		image: '/images/standard_bars.png',
+		image: '/images/animals/bars.jpg',
 		owned: true
 	},
 	{
 		id: 'golden_bars',
 		name: 'Золотой барс',
 		price: 300,
-		image: '/images/golden_bars.png',
+		image: '/images/animals/golden_bars.jpg',
 		owned: false
 	},
 	{
 		id: 'silver_bars',
 		name: 'Серебряный барс',
 		price: 200,
-		image: '/images/silver_bars.png',
+		image: '/images/animals/silver_bars.jpg',
 		owned: false
 	},
 	{
 		id: 'epic_bars',
 		name: 'Эпический барс',
 		price: 500,
-		image: '/images/epic_bars.png',
+		image: '/images/animals/epic_bars.jpg',
 		owned: false
 	},
 	{
 		id: 'legendary_bars',
 		name: 'Легендарный барс',
 		price: 1000,
-		image: '/images/legendary_bars.png',
+		image: '/images/animals/legendary_bars.jpg',
 		owned: false
 	}
 ])
@@ -148,7 +148,11 @@ onMounted(fetchCommand)
 								'ring-2 ring-blue-400': command.link === item.image
 							}"
 						>
-							<img :src="item.image" :alt="item.name" class="w-full h-32 object-contain mb-2" />
+							<img
+								:src="item.image"
+								:alt="item.name"
+								class="w-full object-contain mb-2 rounded-lg"
+							/>
 							<h3 class="font-semibold">{{ item.name }}</h3>
 							<div class="flex justify-between items-center mt-2">
 								<span v-if="item.price > 0" class="text-yellow-600 font-medium">

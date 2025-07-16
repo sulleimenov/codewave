@@ -25,7 +25,7 @@ class TestController extends Controller
         }
 
         $previousResult = TestResult::where('test_id', $test->id)
-            ->where('user_id', auth()->id() ?? 4)
+            ->where('user_id', auth()->id() ?? 2)
             ->latest()
             ->first();
 
@@ -121,7 +121,7 @@ class TestController extends Controller
 
         TestResult::create([
             'test_id' => $test->id,
-            'user_id' => auth()->id() ?? 4,
+            'user_id' => auth()->id() ?? 2,
             'score' => $score,
             'correct' => $correctCount,
             'total' => $totalQuestions,

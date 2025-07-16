@@ -27,6 +27,12 @@ const routes = [
 		meta: { requiresAuth: true, title: 'Список модулей' }
 	},
 	{
+		path: '/subjects_create',
+		name: 'subjects_create',
+		component: SubjectCreate,
+		meta: { requiresAuth: true, title: 'Список модулей' }
+	},
+	{
 		path: '/lessons',
 		name: 'lessons',
 		component: LessonList,

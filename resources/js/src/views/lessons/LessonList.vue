@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useTopicsStore } from '@/stores/useTopicStore'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 const route = useRoute()
 const topicsStore = useTopicsStore()
 const authStore = useAuthStore()
+const router = useRouter()
 
 const subjectId = route.params.subject_id
 
@@ -35,6 +36,12 @@ const handleDelete = async (id) => {
 			<div class="basis-2/12">Дата</div>
 			<!-- <div class="basis-2/12">Оценка</div> -->
 		</div>
+		<button
+			@click="router.push(`/subjects/${subjectId}/topic/create`)"
+			class="p-2 px-6 text-white rounded-xl bg-blue-500 mb-4"
+		>
+			Create
+		</button>
 		<div>
 			<div
 				v-for="(topic, index) in topicsStore.topics"
@@ -59,7 +66,7 @@ const handleDelete = async (id) => {
 					@click="handleDelete(topic.id)"
 					class="basis-1/12 absolute right-0 cursor-pointer w-8 h-8 flex items-center rounded-lg justify-center"
 				>
-					<img src="/public/icons/delete.svg" alt="D" />
+					<img src="/icons/delete.svg" alt="D" />
 				</div>
 			</div>
 			<!-- <div v-if="topicsStore.loading" v-for="i in topicsStore.totalTopics+1" :key="i" class="flex border-b border-gray-100 py-3 last:border-b-0 text-gray-400 animate-pulse">

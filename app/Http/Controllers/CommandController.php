@@ -28,7 +28,7 @@ class CommandController extends Controller
             'topic_id' => $request->topic_id,
             'leader_id' => $request->leader_id,
             'member_ids' => json_encode($request->member_ids),
-            'link' => '/images/standard_bars.png'
+            'link' => '/images/animals/ bars.jpg'
         ]);
 
         return response()->json($command, 201);
@@ -114,7 +114,7 @@ class CommandController extends Controller
 //        }
 
         $command = Command::findOrFail($id);
-        $command->update(['link' => "/images/{$request->type}.png"]);
+        $command->update(['link' => "/images/animals/{$request->type}.jpg"]);
 
         return response()->json($command);
     }

@@ -55,30 +55,30 @@ const links = computed(() => {
 				icon: 'descr.svg',
 				label: 'Описание урока'
 			},
-			{
-				to: {
-					name: 'lesson_criterion',
-					params: {
-						subject_id: route.params.subject_id,
-						topic_id: route.params.topic_id
-					}
-				},
-				icon: 'pool.svg',
-				label: 'Критерий оценивания',
-				extraClass: completedStages.value['Критерий оценивания'] ? '' : 'text-gray-400 saturate-0'
-			},
-			{
-				to: {
-					name: authStore.role === 'admin' ? 'homework_check' : 'homework_view',
-					params: {
-						subject_id: route.params.subject_id,
-						topic_id: route.params.topic_id
-					}
-				},
-				icon: 'homework.svg',
-				label: 'Домашнее задание',
-				extraClass: completedStages.value['Домашнее задание'] ? '' : 'text-gray-400 saturate-0'
-			},
+			// {
+			// 	to: {
+			// 		name: 'lesson_criterion',
+			// 		params: {
+			// 			subject_id: route.params.subject_id,
+			// 			topic_id: route.params.topic_id
+			// 		}
+			// 	},
+			// 	icon: 'pool.svg',
+			// 	label: 'Критерий оценивания',
+			// 	extraClass: completedStages.value['Критерий оценивания'] ? '' : 'text-gray-400 saturate-0'
+			// },
+			// {
+			// 	to: {
+			// 		name: authStore.role === 'admin' ? 'homework_check' : 'homework_view',
+			// 		params: {
+			// 			subject_id: route.params.subject_id,
+			// 			topic_id: route.params.topic_id
+			// 		}
+			// 	},
+			// 	icon: 'homework.svg',
+			// 	label: 'Домашнее задание',
+			// 	extraClass: completedStages.value['Домашнее задание'] ? '' : 'text-gray-400 saturate-0'
+			// },
 			{
 				to: 'lection_show',
 				icon: 'book.svg',
@@ -96,7 +96,7 @@ const links = computed(() => {
 				icon: 'test.svg',
 				label: 'Тестирование',
 				extraClass: completedStages.value['Тестирование'] ? '' : 'text-gray-400 saturate-0'
-			},
+			}
 			// {
 			// 	to: {
 			// 		name: 'command'
@@ -105,18 +105,18 @@ const links = computed(() => {
 			// 	label: 'Команда',
 			// 	extraClass: completedStages.value['Команда'] ? '' : 'text-gray-400 saturate-0'
 			// },
-			{
-				to: '#',
-				icon: 'practical.svg',
-				label: 'Практическое задание',
-				extraClass: completedStages.value['Практическое задание'] ? '' : 'text-gray-400 saturate-0'
-			},
-			{
-				to: '#',
-				icon: 'pool.svg',
-				label: 'Рефлексия',
-				extraClass: completedStages.value['Рефлексия'] ? '' : 'text-gray-400 saturate-0'
-			}
+			// {
+			// 	to: '#',
+			// 	icon: 'practical.svg',
+			// 	label: 'Практическое задание',
+			// 	extraClass: completedStages.value['Практическое задание'] ? '' : 'text-gray-400 saturate-0'
+			// },
+			// {
+			// 	to: '#',
+			// 	icon: 'pool.svg',
+			// 	label: 'Рефлексия',
+			// 	extraClass: completedStages.value['Рефлексия'] ? '' : 'text-gray-400 saturate-0'
+			// }
 		]
 	}
 
