@@ -22,7 +22,6 @@ class Topic extends Model
         'description',
         'type',
     ];
-
     public function test()
     {
         return $this->hasOne(Test::class);

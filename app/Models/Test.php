@@ -20,8 +20,17 @@ class Test extends Model
         return $this->hasMany(Question::class);
     }
 
-    public function results(): HasMany
+//    public function results(): HasMany
+//    {
+//        return $this->hasMany(TestResult::class);
+//    }
+
+    public function results($userId = null): HasMany
     {
-        return $this->hasMany(TestResult::class);
+        $query = $this->hasMany(TestResult::class);
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        return $query;
     }
 }

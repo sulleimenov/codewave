@@ -35,7 +35,7 @@ onMounted(async () => {
 
 	// Fetch lection content
 	try {
-		const response = await axios.get(`/api/subjects/${subjectId}/topic/${topicId}/lection_show`, {
+		const response = await axios.get(`/subjects/${subjectId}/topic/${topicId}/lection_show`, {
 			headers: {
 				Authorization: `Bearer ${authStore.token}`
 			}

@@ -190,8 +190,6 @@ const newQuestion = ref({
 	correctAnswer: ''
 })
 
-axios.defaults.baseURL = 'http://localhost:8000/api'
-
 onMounted(async () => {
 	if (!authStore.isAdmin) {
 		error.value = 'Доступ только для администраторов'
@@ -201,7 +199,7 @@ onMounted(async () => {
 
 	try {
 		axios.defaults.headers.common['Authorization'] = `Bearer ${authStore.token}`
-		const response = await axios.get(`/topics/${route.params.topic_id}/test`)
+		const response = await axios.get(`api/topics/${route.params.topic_id}/test`)
 		test.value = response.data.test
 	} catch (err) {
 		if (err.response?.status === 404) {
@@ -340,7 +338,7 @@ const submitTest = async () => {
 	saving.value = true
 	try {
 		console.log('authStore.user.iauthStore.user.id,', authStore.user.id)
-		const response = await axios.post('/tests', {
+		const response = await axios.post('api/tests', {
 			topic_id: route.params.topic_id,
 			title: testTitle.value,
 			user_id: authStore.user.id, // Передаем user_id из authStore
@@ -374,7 +372,7 @@ const deleteTest = async () => {
 	if (!confirm('Вы уверены, что хотите удалить тест?')) return
 
 	try {
-		await axios.delete(`/tests/${test.value.id}`)
+		await axios.delete(`api/tests/${test.value.id}`)
 		test.value = null
 		questions.value = []
 		error.value = null

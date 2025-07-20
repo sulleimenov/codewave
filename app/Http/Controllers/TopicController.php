@@ -10,20 +10,41 @@ class TopicController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($id)
+    public function index(Request $request, $id)
     {
-        $topics = Topic::where('subject_id', $id)->get()->map(function ($topic) {
-            return [
-                'id' => $topic->id,
-                'subject_id' => $topic->subject_id,
-                'name' => $topic->name,
-                'date' => $topic->created_at->format('d.m.Y'),
-            ];
-        });
+        try {
+            $userId = $request->query('user_id');
 
-        return response()->json($topics, 200);
+            $topics = Topic::where('subject_id', $id)
+                ->with(['test.results' => function ($query) use ($userId) {
+                    if ($userId) {
+                        $query->where('user_id', $userId)->select('id', 'test_id', 'user_id', 'score');
+                    }
+                }])
+                ->get()
+                ->map(function ($topic) use ($userId) {
+                    // Get the score from the first TestResult (if any) for the user
+                    $score = $topic->test && $topic->test->results->isNotEmpty()
+                        ? $topic->test->results->first()->score
+                        : null;
+
+                    return [
+                        'id' => $topic->id,
+                        'subject_id' => $topic->subject_id,
+                        'name' => $topic->name,
+                        'date' => $topic->created_at->format('d.m.Y'),
+                        'score' => $score, // Include score instead of request
+                    ];
+                });
+
+            return response()->json($topics, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'An error occurred while fetching topics.',
+                'message' => $e->getMessage(),
+            ], 400);
+        }
     }
-
     /**
      * Store a newly created resource in storage.
      */

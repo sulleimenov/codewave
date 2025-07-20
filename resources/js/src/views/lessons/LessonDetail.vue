@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, onActivated } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -16,9 +16,10 @@ const date = ref('')
 const error = ref('')
 
 const getLesson = async () => {
+	const url = `api/subjects/${subject_id.value}/topic/${topic_id.value}`
+	console.log('Request URL:', url)
 	try {
-		const { data } = await axios.get(`/api/subjects/${subject_id.value}/topic/${topic_id.value}`)
-
+		const { data } = await axios.get(url)
 		subject_id.value = data.subject_id
 		name.value = data.name
 		objective.value = data.objective
@@ -26,11 +27,23 @@ const getLesson = async () => {
 		description.value = data.description
 		date.value = data.created_at
 	} catch (err) {
+		console.error('Error:', err)
 		error.value = err.response?.data?.message || 'Не удалось загрузить данные'
 	}
 }
 
+// Отслеживание изменений маршрута
+watch(
+	() => [route.params.subject_id, route.params.topic_id],
+	([newSubjectId, newTopicId]) => {
+		subject_id.value = newSubjectId
+		topic_id.value = newTopicId
+		getLesson()
+	}
+)
+
 onMounted(getLesson)
+onActivated(getLesson)
 </script>
 
 <template>

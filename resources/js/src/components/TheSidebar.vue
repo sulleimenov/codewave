@@ -16,7 +16,9 @@ const isThemePage = computed(
 		route.name === 'homework_view' ||
 		route.name === 'homework_check' ||
 		route.name === 'lection_show' ||
-		route.name === 'lection_create'
+		route.name === 'lection_create' ||
+		route.name === 'Command' ||
+		route.name === 'command_create'
 )
 const isModulesPage = computed(() => route.name === 'Модули')
 
@@ -44,6 +46,17 @@ const links = computed(() => {
 
 	if (isThemePage.value) {
 		return [
+			{
+				to: {
+					name: 'Command',
+					params: {
+						subject_id: route.params.subject_id,
+						topic_id: route.params.topic_id
+					}
+				},
+				icon: 'test.svg',
+				label: 'Команда'
+			},
 			{
 				to: {
 					name: 'lesson_detail_description',
@@ -136,10 +149,5 @@ const links = computed(() => {
 			<img :src="`/icons/${link.icon}`" :alt="`${link.label}`" />
 			<span>{{ link.label }}</span>
 		</router-link>
-		<a
-			href="/subjects/1/topic/1/command"
-			class="flex gap-2 py-3 px-6 hover:bg-gray-50 transition-colors"
-			><img src="/icons/test.svg" alt="Команда" /><span>Команда</span></a
-		>
 	</aside>
 </template>

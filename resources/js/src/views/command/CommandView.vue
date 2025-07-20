@@ -9,7 +9,7 @@ const authStore = useAuthStore()
 const command = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
-const coins = ref(1000) // Начальное количество монет
+const coins = ref(1000)
 
 const shopItems = ref([
 	{
@@ -50,21 +50,27 @@ const shopItems = ref([
 ])
 
 const fetchCommand = async () => {
+	isLoading.value = true
+	error.value = null
 	try {
 		const response = await axios.get(
 			`/api/subjects/${route.params.subject_id}/topic/${route.params.topic_id}/command`
 		)
-		command.value = response.data
-
-		// Обновляем статус owned для купленных барсов
-		shopItems.value.forEach((item) => {
-			if (command.value.link === item.image) {
-				item.owned = true
-			}
-		})
+		if (response.status === 200 && response.data) {
+			command.value = response.data
+			shopItems.value.forEach((item) => {
+				if (command.value.link === item.image) {
+					item.owned = true
+				}
+			})
+		} else {
+			error.value = 'Данные команды не найдены'
+		}
 	} catch (err) {
-		error.value = 'Ошибка при загрузке команды'
+		// error.value = 'Ошибка при загрузке команды'
 		console.error(err)
+	} finally {
+		isLoading.value = false
 	}
 }
 
@@ -73,30 +79,26 @@ const buyAndUpgradePhoto = async (item) => {
 		error.value = 'Недостаточно монет для покупки'
 		return
 	}
-
 	if (item.owned) {
 		error.value = 'Этот барс уже куплен'
 		return
 	}
-
 	isLoading.value = true
 	error.value = null
 	try {
-		const response = await axios.post(`/api/commands/${command.value.id}/upgrade-photo`, {
+		const response = await axios.post(`/api/commands/${command.value?.id}/upgrade-photo`, {
 			type: item.id
 		})
-		command.value = response.data
-
-		// Обновляем состояние магазина
-		shopItems.value.forEach((shopItem) => {
-			if (shopItem.id === item.id) {
-				shopItem.owned = true
+		if (response.status === 200) {
+			command.value = response.data
+			shopItems.value.forEach((shopItem) => {
+				if (shopItem.id === item.id) {
+					shopItem.owned = true
+				}
+			})
+			if (authStore.role !== 'admin') {
+				coins.value -= item.price
 			}
-		})
-
-		// Вычитаем стоимость, если не админ
-		if (authStore.role !== 'admin') {
-			coins.value -= item.price
 		}
 	} catch (err) {
 		error.value = 'Ошибка при покупке барса'
@@ -113,7 +115,7 @@ onMounted(fetchCommand)
 	<div class="p-6">
 		<h1 class="text-2xl font-bold mb-4">Команда</h1>
 
-		<div v-if="authStore.role !== 'admin'" class="mb-4 p-3 bg-yellow-100 rounded-lg">
+		<div v-if="!authStore.isAdmin" class="mb-4 p-3 bg-yellow-100 rounded-lg">
 			<div class="flex items-center">
 				<span class="font-semibold">Ваши монеты:</span>
 				<span class="ml-2 px-3 py-1 bg-yellow-200 rounded-full">{{ coins }}</span>
@@ -124,13 +126,15 @@ onMounted(fetchCommand)
 			{{ error }}
 		</div>
 
-		<div v-if="command" class="bg-white rounded-lg shadow p-4 mb-6">
+		<div v-if="isLoading" class="text-gray-500">Загрузка...</div>
+
+		<div v-else-if="command" class="bg-white rounded-lg shadow p-4 mb-6">
 			<div class="flex flex-col md:flex-row gap-6">
 				<div class="flex-1">
 					<h2 class="text-xl font-bold mb-2">Текущий барс команды</h2>
 					<img
-						:src="command.link"
-						:alt="`${command.link}, Команда ${command.id}`"
+						:src="command.link || '/images/animals/bars.jpg'"
+						:alt="`Команда ${command.id}`"
 						class="mb-4 max-w-xs rounded border-4 border-blue-200"
 					/>
 				</div>
@@ -159,7 +163,6 @@ onMounted(fetchCommand)
 									{{ item.price }} монет
 								</span>
 								<span v-else class="text-gray-500">Бесплатно</span>
-
 								<button
 									@click="buyAndUpgradePhoto(item)"
 									:disabled="
@@ -182,17 +185,19 @@ onMounted(fetchCommand)
 
 			<div class="mt-6 pt-4 border-t">
 				<h2 class="text-lg font-semibold">Лидер команды</h2>
-				<p class="mb-4">{{ command.leader?.firstname }} {{ command.leader?.lastname }}</p>
-
+				<p class="mb-4">
+					{{ command.leader?.firstname || 'Не указан' }} {{ command.leader?.lastname || '' }}
+				</p>
 				<h2 class="text-lg font-semibold">Участники</h2>
 				<ul class="list-disc pl-5">
-					<li v-for="member in command.members" :key="member.id">
+					<li v-for="member in command.members || []" :key="member.id">
 						{{ member.firstname }} {{ member.lastname }}
 					</li>
+					<li v-if="!command.members?.length" class="text-gray-500">Участники отсутствуют</li>
 				</ul>
 			</div>
 		</div>
 
-		<div v-else-if="!error" class="text-gray-500">Загрузка...</div>
+		<div v-else class="text-gray-500">Данные команды не загружены</div>
 	</div>
 </template>

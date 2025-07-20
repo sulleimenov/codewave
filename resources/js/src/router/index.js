@@ -17,6 +17,7 @@ import LectionShow from '../views/lections/LectionShow.vue'
 import LectionCreate from '../views/lections/LectionCreate.vue'
 import CommandView from '@/views/command/CommandView.vue'
 import CommandAdd from '@/views/command/CommandAdd.vue'
+import Command from '@/views/command/Command.vue'
 
 const routes = [
 	{ path: '/', name: 'login', component: Login },
@@ -113,15 +114,15 @@ const routes = [
 	{
 		path: '/subjects/:subject_id/topic/:topic_id/command',
 		name: 'Command',
-		component: CommandView,
+		component: Command,
 		meta: { requiresAuth: true, title: 'Команда' }
-	},
-	{
-		path: '/subjects/:subject_id/topic/:topic_id/command_create',
-		name: 'command_create',
-		component: CommandAdd,
-		meta: { requiresAuth: true, title: 'Создание команды' }
 	}
+	// {
+	// 	path: '/subjects/:subject_id/topic/:topic_id/command_create',
+	// 	name: 'command_create',
+	// 	component: CommandAdd,
+	// 	meta: { requiresAuth: true, title: 'Создание команды' }
+	// }
 ]
 
 const router = createRouter({

@@ -23,16 +23,24 @@ export const useTopicsStore = defineStore('topics', {
 				return null
 			}
 		},
-		async getTopics(subjectId) {
+		async getTopics(subjectId, userId = null) {
 			try {
 				this.loading = true
+				const params = {}
+				if (userId) {
+					params.user_id = userId
+				}
 
-				const { data } = await axios.get(`/api/subjects/${subjectId}/topics`)
-				this.topics = data
+				const data = await axios.get(`/api/subjects/${subjectId}/topics`, { params })
+				if (data.status === 200) {
+					this.topics = data.data
+				}
 			} catch (error) {
 				console.log(error)
+				return null
 			} finally {
 				this.loading = false
+				return null
 			}
 		},
 		async deleteTopic(id) {
@@ -41,6 +49,7 @@ export const useTopicsStore = defineStore('topics', {
 				this.getTopics()
 			} catch (error) {
 				console.log(error)
+				return null
 			}
 		}
 	}

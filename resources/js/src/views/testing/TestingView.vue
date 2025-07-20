@@ -155,8 +155,6 @@ const hasPreviousAttempt = ref(false)
 const loading = ref(true)
 const error = ref(null)
 
-axios.defaults.baseURL = 'http://localhost:8000/api'
-
 onMounted(async () => {
 	if (!authStore.isAuthenticated) {
 		error.value = 'Вы должны быть авторизованы'
@@ -167,7 +165,7 @@ onMounted(async () => {
 	try {
 		console.log('Auth Token:', authStore.token)
 		axios.defaults.headers.common['Authorization'] = `Bearer ${authStore.token}`
-		const response = await axios.get(`/topics/${route.params.topic_id}/test`)
+		const response = await axios.get(`api/topics/${route.params.topic_id}/test`)
 		const data = response.data
 
 		console.log('Test Data:', JSON.stringify(data, null, 2))
@@ -210,7 +208,7 @@ async function nextQuestion() {
 			if (!testId) throw new Error('Не удалось определить ID теста')
 
 			console.log('Submitting answers:', userAnswers.value.filter(Boolean))
-			const response = await axios.post(`/tests/${testId}/results`, {
+			const response = await axios.post(`api/tests/${testId}/results`, {
 				answers: userAnswers.value.filter(Boolean)
 			})
 

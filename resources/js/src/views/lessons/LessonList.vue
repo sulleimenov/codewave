@@ -4,18 +4,19 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { useTopicsStore } from '@/stores/useTopicStore'
 import { useAuthStore } from '@/stores/useAuthStore'
-// import { LessonList } from '@/views/lessons/LessonList'
+
+const router = useRouter()
 const route = useRoute()
 const topicsStore = useTopicsStore()
 const authStore = useAuthStore()
-const router = useRouter()
 
 const subjectId = route.params.subject_id
 
-const score = ref(100)
+const score = ref('?')
 
 onMounted(() => {
-	topicsStore.getTopics(subjectId)
+	// console.log(authStore.getUser.id, 'user') // Для отладки о передаче user
+	topicsStore.getTopics(subjectId, !authStore.isAdmin ? authStore.getUser.id : '')
 })
 
 const handleDelete = async (id) => {
@@ -30,19 +31,21 @@ const handleDelete = async (id) => {
 
 <template>
 	<div class="w-full rounded-lg shadow-1 px-8 py-7">
+		<button
+			v-if="authStore.isAdmin"
+			class="p-2 px-12 text-white rounded-sm bg-blue-500 mb-4"
+			@click="router.push(`/subjects/${subjectId}/topic/create`)"
+		>
+			Create
+		</button>
 		<div class="flex text-gray-400 pb-4">
 			<div class="basis-1/12">№</div>
 			<div class="basis-full">Тема</div>
 			<div class="basis-2/12">Дата</div>
-			<!-- <div class="basis-2/12">Оценка</div> -->
+			<div v-if="!authStore.isAdmin" class="basis-2/12">Оценка</div>
 		</div>
-		<button
-			@click="router.push(`/subjects/${subjectId}/topic/create`)"
-			class="p-2 px-6 text-white rounded-xl bg-blue-500 mb-4"
-		>
-			Create
-		</button>
-		<div>
+
+		<div v-if="topicsStore.topics">
 			<div
 				v-for="(topic, index) in topicsStore.topics"
 				:key="topic.id"
@@ -55,18 +58,20 @@ const handleDelete = async (id) => {
 					<div class="basis-1/12">{{ index + 1 }}</div>
 					<div class="basis-full">{{ topic.name }}</div>
 					<div class="basis-2/12">{{ topic.date }}</div>
-					<!-- <div
-						:class="`basis-2/12 ${score >= 90 ? 'text-green-500' : ''} ${score >= 70 && score < 90 ? 'text-orange-500' : ''}`"
+					<div
+						v-if="!authStore.isAdmin"
+						:class="`basis-2/12 ${topic.score >= 90 ? 'text-green-500' : topic.score >= 70 ? 'text-orange-500' : 'text-red-500'}`"
 					>
-						{{ score }}
-					</div> -->
+						{{ topic.score }}
+					</div>
 					<!-- <div class="basis-1/12"></div> -->
 				</router-link>
 				<div
+					v-admin
 					@click="handleDelete(topic.id)"
 					class="basis-1/12 absolute right-0 cursor-pointer w-8 h-8 flex items-center rounded-lg justify-center"
 				>
-					<img src="/icons/delete.svg" alt="D" />
+					<img src="/public/icons/delete.svg" alt="D" />
 				</div>
 			</div>
 			<!-- <div v-if="topicsStore.loading" v-for="i in topicsStore.totalTopics+1" :key="i" class="flex border-b border-gray-100 py-3 last:border-b-0 text-gray-400 animate-pulse">
