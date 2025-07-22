@@ -1,4 +1,3 @@
-3
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -30,8 +29,7 @@ const submit = async () => {
 	isLoading.value = true
 	error.value = null
 	try {
-		console.log(route.params.subject_id, 'route.params.subject_id')
-		const response = await axios.post('/api/commands', {
+		await axios.post('/api/commands', {
 			subject_id: route.params.subject_id,
 			leader_id: selectedLeader.value,
 			member_ids: selectedMembers.value
@@ -42,6 +40,8 @@ const submit = async () => {
 				subject_id: route.params.subject_id,
 				topic_id: route.params.topic_id
 			}
+		}).then(() => {
+			router.go(0)
 		})
 	} catch (err) {
 		error.value = 'Ошибка при создании команды'
@@ -53,6 +53,7 @@ const submit = async () => {
 
 onMounted(fetchStudents)
 </script>
+
 
 <template>
 	<div class="p-6">
