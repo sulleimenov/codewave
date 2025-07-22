@@ -7,7 +7,7 @@ import 'md-editor-v3/lib/style.css'
 
 const route = useRoute()
 const markdownContent = ref('')
-const lectionTitle = ref('')
+const lectionTitle = ref('d')
 
 onMounted(async () => {
 	try {
@@ -23,14 +23,14 @@ onMounted(async () => {
 		lectionTitle.value = response.data.title || 'Lection'
 	} catch (error) {
 		console.error('Failed to fetch lection:', error)
-		markdownContent.value = 'Error loading lection.'
+		markdownContent.value = 'Лекции не обнаружено'
 	}
 })
 </script>
 
 <template>
 	<div class="mx-auto mt-6 p-4 bg-white rounded shadow">
-		<h1 class="text-2xl font-bold mb-4">{{ lectionTitle }}</h1>
+		<!-- <h1 class="text-2xl font-bold mb-4">{{ lectionTitle }}</h1> -->
 		<MdPreview v-model="markdownContent" language="ru-RU" />
 	</div>
 </template>

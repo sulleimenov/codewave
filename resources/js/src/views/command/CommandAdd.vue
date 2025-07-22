@@ -30,8 +30,9 @@ const submit = async () => {
 	isLoading.value = true
 	error.value = null
 	try {
+		console.log(route.params.subject_id, 'route.params.subject_id')
 		const response = await axios.post('/api/commands', {
-			topic_id: route.params.topic_id,
+			subject_id: route.params.subject_id,
 			leader_id: selectedLeader.value,
 			member_ids: selectedMembers.value
 		})

@@ -13,7 +13,7 @@ import TestingCreate from '@/views/testing/TestingCreate.vue'
 import TestingView from '@/views/testing/TestingView.vue'
 import HomeworkView from '@/views/homework/HomeworkView.vue'
 import HomeworkCheck from '@/views/homework/HomeworkCheck.vue'
-import LectionShow from '../views/lections/LectionShow.vue'
+import LectionView from '../views/lections/LectionView.vue'
 import LectionCreate from '../views/lections/LectionCreate.vue'
 import CommandView from '@/views/command/CommandView.vue'
 import CommandAdd from '@/views/command/CommandAdd.vue'
@@ -100,9 +100,9 @@ const routes = [
 		meta: { requiresAuth: true, title: 'Домашнее задание' }
 	},
 	{
-		path: '/subjects/:subject_id/topic/:topic_id/lection_show',
-		name: 'lection_show',
-		component: LectionShow,
+		path: '/subjects/:subject_id/topic/:topic_id/lection',
+		name: 'lection',
+		component: LectionView,
 		meta: { requiresAuth: true, title: 'Просмотр лекции' }
 	},
 	{

@@ -1,31 +1,125 @@
 <script setup>
-import Link from '@/components/ui/Link.vue'
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, watch, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
 
-const route = useRoute()
+const route = useRoute();
+const router = useRouter();
+const teamImage = ref('/images/animals/bars.jpg');
+const isLoading = ref(false);
+const error = ref(null);
+const cache = ref({});
+const hasCommand = ref(false);
 
-const subjectId = computed(() => route.params.subject_id || null)
-const topicId = computed(() => route.params.topic_id || null)
+const fetchTeamImage = async () => {
+	const subjectId = route.params.subject_id;
 
-const isSubjectsPage = computed(() => route.path === '/subjects')
-const isTopicsPage = computed(() => /^\/subjects\/\d+$/.test(route.path))
-const isTopicDetailPage = computed(() => /^\/subjects\/\d+\/topic\/\d+/.test(route.path))
+	if (subjectId) {
+		if (cache.value[subjectId]) {
+			teamImage.value = cache.value[subjectId].link;
+			hasCommand.value = cache.value[subjectId].exists;
+			return;
+		}
+
+		isLoading.value = true;
+		error.value = null;
+		try {
+			const response = await axios.get(`/api/subjects/${subjectId}/command-image`);
+			if (response.status === 200 && response.data && response.data.link && response.data.exists !== false) {
+				teamImage.value = response.data.link;
+				hasCommand.value = true;
+				cache.value[subjectId] = { link: response.data.link, exists: true };
+			} else {
+				teamImage.value = '/images/animals/bars.jpg';
+				hasCommand.value = false;
+				cache.value[subjectId] = { link: '/images/animals/bars.jpg', exists: false };
+			}
+		} catch (err) {
+			error.value = err?.response?.data?.error || 'Ошибка при загрузке изображения команды';
+			teamImage.value = '/images/animals/bars.jpg';
+			hasCommand.value = false;
+			cache.value[subjectId] = { link: '/images/animals/bars.jpg', exists: false };
+			console.error(err);
+		} finally {
+			isLoading.value = false;
+		}
+	} else {
+		teamImage.value = '/images/animals/bars.jpg';
+		hasCommand.value = false;
+	}
+};
+
+onMounted(fetchTeamImage);
+watch(
+	() => route.params.subject_id,
+	() => {
+		fetchTeamImage();
+	}
+);
+
+const menuItems = computed(() => {
+	const basePath = route.params.subject_id && route.params.topic_id
+		? `/subjects/${route.params.subject_id}/topic/${route.params.topic_id}`
+		: '#';
+	const items = [];
+
+	if (route.params.subject_id && hasCommand.value) {
+		items.push({
+			name: 'Команда',
+			route: `${basePath}/command`,
+			active: route.name === 'Command',
+			image: teamImage.value,
+			disabled: !route.params.topic_id
+		});
+	}
+
+	if (route.params.subject_id && route.params.topic_id) {
+		items.push(
+			{
+				name: 'Описание',
+				route: `${basePath}/description`,
+				active: route.name === 'lesson_detail_description',
+				disabled: false
+			},
+			{
+				name: 'Лекция',
+				route: `${basePath}/lection`,
+				active: route.name === 'lection',
+				disabled: false
+			},
+			{
+				name: 'Тестирование',
+				route: `${basePath}/testing`,
+				active: route.name === 'lesson_testing',
+				disabled: false
+			}
+		);
+	}
+
+	return items;
+});
 </script>
 
 <template>
-	<div class="flex gap-3">
-		<Link v-admin to="/subjects/create" v-if="isSubjectsPage" text="Добавить модуль" />
-		<Link
-			v-admin
-			:to="`/subjects/${subjectId}/topic/create`"
-			v-if="isTopicsPage"
-			text="Добавить тему"
-		/>
-		<Link
-			:to="`/subjects/${subjectId}/topic/${topicId}/lection_show`"
-			v-if="isTopicDetailPage && route.name !== 'lection_show'"
-			text="Просмотреть лекцию"
-		/>
-	</div>
+	<nav class="bg-gray-800 p-2">
+		<ul class="flex space-x-2">
+			<li v-for="item in menuItems" :key="item.name" class="flex items-center">
+				<router-link
+					:to="item.route"
+					class="text-white hover:text-gray-300 px-2 py-1 rounded flex items-center"
+					:class="{ 'bg-gray-600': item.active, 'pointer-events-none text-gray-400': item.disabled }"
+				>
+					<img
+						v-if="item.image"
+						:src="item.image"
+						alt="Team Image"
+						class="inline-block w-12 h-12 mr-1 rounded"
+					/>
+					{{ item.name }}
+				</router-link>
+			</li>
+		</ul>
+		<div v-if="isLoading" class="text-white">Загрузка...</div>
+		<div v-if="error" class="text-red-400">{{ error }}</div>
+	</nav>
 </template>

@@ -14,7 +14,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 WORKDIR /var/www/html
 COPY . /var/www/html
+RUN git config --global --add safe.directory /var/www/html \
+ && composer install
 
-RUN composer install
 
 EXPOSE 8000

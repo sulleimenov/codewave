@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Command;
 use App\Models\Test;
 use App\Models\Question;
 use App\Models\Answer;
 use App\Models\TestResult;
+use App\Models\Topic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +16,12 @@ class TestController extends Controller
 {
     public function getTestByTopic($topic)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        Log::info('Authenticated user', ['user_id' => Auth::id(), 'user' => Auth::user()]);
+
         $test = Test::where('topic_id', $topic)
             ->with(['questions' => function ($query) {
                 $query->with(['answers:id,question_id,title,is_correct'])->orderBy('id');
@@ -25,7 +33,7 @@ class TestController extends Controller
         }
 
         $previousResult = TestResult::where('test_id', $test->id)
-            ->where('user_id', auth()->id() ?? 2)
+            ->where('user_id', Auth::id())
             ->latest()
             ->first();
 
@@ -39,14 +47,6 @@ class TestController extends Controller
                 $correctAnswer = $question->answers->where('is_correct', true)->first();
                 $userAnswerId = isset($userAnswers[$index]) ? (int)$userAnswers[$index] : null;
                 $userAnswer = $userAnswerId ? $question->answers->where('id', $userAnswerId)->first() : null;
-
-                Log::debug('Processing question', [
-                    'question_id' => $question->id,
-                    'index' => $index,
-                    'user_answer_id' => $userAnswerId,
-                    'user_answer' => $userAnswer ? $userAnswer->toArray() : null,
-                    'correct_answer' => $correctAnswer ? $correctAnswer->toArray() : null,
-                ]);
 
                 $isCorrect = $userAnswer && $userAnswer->id === $correctAnswer->id;
 
@@ -76,6 +76,12 @@ class TestController extends Controller
 
     public function submitTest(Request $request, Test $test)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        Log::info('Authenticated user', ['user_id' => Auth::id(), 'user' => Auth::user()]);
+
         $request->validate([
             'answers' => 'required|array',
             'answers.*' => 'exists:answers,id',
@@ -121,12 +127,34 @@ class TestController extends Controller
 
         TestResult::create([
             'test_id' => $test->id,
-            'user_id' => auth()->id() ?? 2,
+            'user_id' => Auth::id(),
             'score' => $score,
             'correct' => $correctCount,
             'total' => $totalQuestions,
             'answers' => json_encode($userAnswers),
         ]);
+
+        $topic = $test->topic;
+
+        if ($topic) {
+            $subjectId = $topic->subject_id;
+
+            \Log::debug('Looking for command by subject_id', ['subject_id' => $subjectId]);
+
+            $command = Command::where('subject_id', $subjectId)->first();
+
+            if ($command) {
+                $command->balls = ($command->balls ?? 0) + $score;
+                $command->save();
+
+                \Log::debug('Balls updated', [
+                    'command_id' => $command->id,
+                    'new_balls' => $command->balls,
+                ]);
+            } else {
+                \Log::debug('No command found for subject_id', ['subject_id' => $subjectId]);
+            }
+        }
 
         return response()->json([
             'score' => $score,
@@ -135,16 +163,20 @@ class TestController extends Controller
             'details' => $results,
         ]);
     }
+
     public function createTest(Request $request)
     {
-        // Логируем входные данные для отладки
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        Log::info('Authenticated user', ['user_id' => Auth::id(), 'user' => Auth::user()]);
+
         \Log::info('Request data:', $request->all());
 
-        // Валидация запроса (убрали questions.*.type)
         $request->validate([
             'topic_id' => 'required|exists:topics,id',
             'title' => 'required|string',
-            'user_id' => 'required|exists:users,id',
             'questions' => 'required|array|min:1',
             'questions.*.title' => 'required|string',
             'questions.*.answers' => 'required|array|min:1',
@@ -152,24 +184,21 @@ class TestController extends Controller
             'questions.*.answers.*.is_correct' => 'required|boolean',
         ]);
 
-        // Проверяем, нет ли уже теста для данной темы
         $existingTest = Test::where('topic_id', $request->topic_id)->first();
         if ($existingTest) {
             return response()->json(['error' => 'Test already exists for this topic'], 400);
         }
 
-        // Создаем тест
         $test = Test::create([
             'topic_id' => $request->topic_id,
             'title' => $request->title,
-            'user_id' => $request->user_id,
+            'user_id' => Auth::id(),
         ]);
 
         foreach ($request->questions as $q) {
             $question = Question::create([
                 'test_id' => $test->id,
                 'title' => $q['title'],
-                // Поле type удалено
             ]);
 
             foreach ($q['answers'] as $answer) {
@@ -184,19 +213,25 @@ class TestController extends Controller
         $test->load('questions.answers');
         return response()->json(['test' => $test], 201);
     }
+
     public function deleteTest($test_id)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        Log::info('Authenticated user', ['user_id' => Auth::id(), 'user' => Auth::user()]);
+
         $test = Test::find($test_id);
         if (!$test) {
             return response()->json(['error' => 'Test not found'], 404);
         }
 
-        // Delete associated questions and answers
         foreach ($test->questions as $question) {
             $question->answers()->delete();
             $question->delete();
         }
-        $test->results()->delete(); // Delete associated test results
+        $test->results()->delete();
         $test->delete();
 
         return response()->json(['message' => 'Test deleted successfully']);

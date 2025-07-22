@@ -7,6 +7,6 @@ const authStore = useAuthStore()
 </script>
 
 <template>
-	<CommandView v-if="!authStore.isAdmin"></CommandView>
-	<CommandAdd v-else></CommandAdd>
+	<CommandView></CommandView>
+	<CommandAdd v-if="authStore.isAdmin"></CommandAdd>
 </template>

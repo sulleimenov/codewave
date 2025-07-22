@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Command extends Model
 {
-    protected $fillable = ['topic_id', 'leader_id', 'member_ids', 'link'];
+    protected $fillable = ['subject_id', 'leader_id', 'member_ids', 'link', 'balls'];
 
     protected $casts = [
         'member_ids' => 'array'

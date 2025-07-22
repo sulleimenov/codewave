@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Command;
@@ -9,44 +8,72 @@ use Illuminate\Support\Facades\Auth;
 
 class CommandController extends Controller
 {
+    public function getTeamImage(Request $request, $subject_id)
+    {
+        $command = Command::where('subject_id', $subject_id)->first();
+
+        if (!$command) {
+            return response()->json(['link' => '/images/animals/bars.jpg'], 200);
+        }
+
+        return response()->json(['link' => $command->link], 200);
+    }
+
+    public function spendCoinsAndUpgrade(Request $request, $id)
+    {
+        $request->validate([
+            'type' => 'required|in:standard_bars,golden_bars,silver_bars,epic_bars,legendary_bars',
+            'price' => 'required|integer|min:0'
+        ]);
+
+        $command = Command::findOrFail($id);
+
+        if (Auth::user()->role !== 'admin' && Auth::user()->id !== $command->leader_id) {
+            return response()->json(['error' => 'Только лидер команды может совершать покупки'], 403);
+        }
+
+        if ($command->balls < $request->price) {
+            return response()->json(['error' => 'Недостаточно баллов'], 400);
+        }
+
+        $command->balls -= $request->price;
+        $command->link = "/images/animals/{$request->type}.jpg";
+        $command->save();
+
+        return response()->json($command);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'topic_id' => 'required|exists:topics,id',
+            'subject_id' => 'required|exists:subjects,id',
             'leader_id' => 'required|exists:users,id',
             'member_ids' => 'required|array',
             'member_ids.*' => 'exists:users,id'
         ]);
 
-//        if (Auth::user()->role !== 'admin') {
-//            return response()->json(['error' => 'Unauthorized'], 403);
-//        }
-
-        Command::where('topic_id', $request->topic_id)->delete();
+        Command::where('subject_id', $request->subject_id)->delete();
 
         $command = Command::create([
-            'topic_id' => $request->topic_id,
+            'subject_id' => $request->subject_id,
             'leader_id' => $request->leader_id,
             'member_ids' => json_encode($request->member_ids),
-            'link' => '/images/animals/ bars.jpg'
+            'link' => '/images/animals/bars.jpg'
         ]);
 
         return response()->json($command, 201);
     }
 
-    public function show($subject_id, $topic_id)
+    public function show(Request $request)
     {
-        $command = Command::where('topic_id', $topic_id)->with('leader')->firstOrFail();
+        $subject_id = $request->route('subject_id');
+        $command = Command::where('subject_id', $subject_id)->with('leader')->firstOrFail();
         $command->members = $command->members();
         return response()->json($command);
     }
 
     public function getStudents()
     {
-//        if (Auth::user()->role !== 'admin') {
-//            return response()->json(['error' => 'Unauthorized'], 403);
-//        }
-
         $students = User::where('role', 'user')->get(['id', 'username', 'firstname', 'lastname']);
         return response()->json($students);
     }
@@ -57,10 +84,6 @@ class CommandController extends Controller
             'member_ids' => 'required|array',
             'member_ids.*' => 'exists:users,id'
         ]);
-
-//        if (Auth::user()->role !== 'admin') {
-//            return response()->json(['error' => 'Unauthorized'], 403);
-//        }
 
         $command = Command::findOrFail($id);
         $currentMembers = is_string($command->member_ids) ? json_decode($command->member_ids, true) : $command->member_ids;
@@ -78,10 +101,6 @@ class CommandController extends Controller
             'member_ids.*' => 'exists:users,id'
         ]);
 
-//        if (Auth::user()->role !== 'admin') {
-//            return response()->json(['error' => 'Unauthorized'], 403);
-//        }
-
         $command = Command::findOrFail($id);
         $command->update([
             'leader_id' => $request->leader_id,
@@ -93,10 +112,6 @@ class CommandController extends Controller
 
     public function destroy($id)
     {
-//        if (Auth::user()->role !== 'admin') {
-//            return response()->json(['error' => 'Unauthorized'], 403);
-//        }
-
         $command = Command::findOrFail($id);
         $command->delete();
 
@@ -108,10 +123,6 @@ class CommandController extends Controller
         $request->validate([
             'type' => 'required|in:standard_bars,golden_bars,silver_bars'
         ]);
-
-//        if (Auth::user()->role !== 'admin') {
-//            return response()->json(['error' => 'Unauthorized'], 403);
-//        }
 
         $command = Command::findOrFail($id);
         $command->update(['link' => "/images/animals/{$request->type}.jpg"]);

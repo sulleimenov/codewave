@@ -1,15 +1,15 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/useAuthStore'
-import axios from 'axios'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/useAuthStore';
+import axios from 'axios';
 
-const route = useRoute()
-const authStore = useAuthStore()
-const command = ref(null)
-const error = ref(null)
-const isLoading = ref(false)
-const coins = ref(1000)
+const route = useRoute();
+const authStore = useAuthStore();
+const command = ref(null);
+const error = ref(null);
+const isLoading = ref(false);
+const coins = ref(0);
 
 const shopItems = ref([
 	{
@@ -47,75 +47,79 @@ const shopItems = ref([
 		image: '/images/animals/legendary_bars.jpg',
 		owned: false
 	}
-])
+]);
 
 const fetchCommand = async () => {
-	isLoading.value = true
-	error.value = null
+	isLoading.value = true;
+	error.value = null;
 	try {
 		const response = await axios.get(
 			`/api/subjects/${route.params.subject_id}/topic/${route.params.topic_id}/command`
-		)
+		);
 		if (response.status === 200 && response.data) {
-			command.value = response.data
+			command.value = response.data;
+			coins.value = response.data.balls ?? 0;
 			shopItems.value.forEach((item) => {
 				if (command.value.link === item.image) {
-					item.owned = true
+					item.owned = true;
 				}
-			})
+			});
 		} else {
-			error.value = 'Данные команды не найдены'
+			error.value = 'Данные команды не найдены';
 		}
 	} catch (err) {
-		// error.value = 'Ошибка при загрузке команды'
-		console.error(err)
+		error.value = err?.response?.data?.error || 'Ошибка при загрузке команды';
+		console.error(err);
 	} finally {
-		isLoading.value = false
+		isLoading.value = false;
 	}
-}
+};
 
 const buyAndUpgradePhoto = async (item) => {
+	if (authStore.role !== 'admin' && authStore.user?.id !== command.value?.leader_id) {
+		error.value = 'Только лидер команды может совершать покупки';
+		return;
+	}
 	if (authStore.role !== 'admin' && coins.value < item.price) {
-		error.value = 'Недостаточно монет для покупки'
-		return
+		error.value = 'Недостаточно монет для покупки';
+		return;
 	}
 	if (item.owned) {
-		error.value = 'Этот барс уже куплен'
-		return
+		error.value = 'Этот барс уже куплен';
+		return;
 	}
-	isLoading.value = true
-	error.value = null
+	isLoading.value = true;
+	error.value = null;
 	try {
-		const response = await axios.post(`/api/commands/${command.value?.id}/upgrade-photo`, {
-			type: item.id
-		})
+		const response = await axios.post(`/api/commands/${command.value?.id}/spend-coins-upgrade`, {
+			type: item.id,
+			price: item.price
+		});
 		if (response.status === 200) {
-			command.value = response.data
+			command.value = response.data;
+			coins.value = response.data.balls ?? 0;
 			shopItems.value.forEach((shopItem) => {
 				if (shopItem.id === item.id) {
-					shopItem.owned = true
+					shopItem.owned = true;
 				}
-			})
-			if (authStore.role !== 'admin') {
-				coins.value -= item.price
-			}
+			});
 		}
 	} catch (err) {
-		error.value = 'Ошибка при покупке барса'
-		console.error(err)
+		error.value = err?.response?.data?.error || 'Ошибка при покупке барса';
+		console.error(err);
 	} finally {
-		isLoading.value = false
+		isLoading.value = false;
 	}
-}
+};
 
-onMounted(fetchCommand)
+onMounted(fetchCommand);
 </script>
 
 <template>
 	<div class="p-6">
 		<h1 class="text-2xl font-bold mb-4">Команда</h1>
 
-		<div v-if="!authStore.isAdmin" class="mb-4 p-3 bg-yellow-100 rounded-lg">
+		<div v-if="authStore.role !== 'admin'" class="mb-4 p-3 bg-yellow-100 rounded-lg">
 			<div class="flex items-center">
 				<span class="font-semibold">Ваши монеты:</span>
 				<span class="ml-2 px-3 py-1 bg-yellow-200 rounded-full">{{ coins }}</span>
@@ -147,10 +151,10 @@ onMounted(fetchCommand)
 							:key="item.id"
 							class="border rounded-lg p-3 hover:shadow-md transition-shadow"
 							:class="{
-								'border-green-300 bg-green-50': item.owned,
-								'border-gray-200': !item.owned,
-								'ring-2 ring-blue-400': command.link === item.image
-							}"
+                                'border-green-300 bg-green-50': item.owned,
+                                'border-gray-200': !item.owned,
+                                'ring-2 ring-blue-400': command.link === item.image
+                            }"
 						>
 							<img
 								:src="item.image"
@@ -159,21 +163,24 @@ onMounted(fetchCommand)
 							/>
 							<h3 class="font-semibold">{{ item.name }}</h3>
 							<div class="flex justify-between items-center mt-2">
-								<span v-if="item.price > 0" class="text-yellow-600 font-medium">
-									{{ item.price }} монет
-								</span>
+                                <span v-if="item.price > 0" class="text-yellow-600 font-medium">
+                                    {{ item.price }} монет
+                                </span>
 								<span v-else class="text-gray-500">Бесплатно</span>
 								<button
 									@click="buyAndUpgradePhoto(item)"
 									:disabled="
-										isLoading || (authStore.role !== 'admin' && (coins < item.price || item.owned))
-									"
+                                        isLoading ||
+                                        (authStore.role !== 'admin' &&
+                                        (coins < item.price || item.owned || authStore.user?.id !== command?.leader_id))
+                                    "
 									class="px-3 py-1 text-sm font-medium rounded"
 									:class="{
-										'bg-blue-600 text-white hover:bg-blue-700': !item.owned,
-										'bg-gray-200 text-gray-600 cursor-not-allowed': item.owned,
-										'bg-green-100 text-green-800': command.link === item.image
-									}"
+                                        'bg-blue-600 text-white hover:bg-blue-700': !item.owned && (authStore.role === 'admin' || authStore.user?.id === command?.leader_id),
+                                        'bg-gray-200 text-gray-600 cursor-not-allowed': item.owned || (authStore.role !== 'admin' && (coins < item.price || authStore.user?.id !== command?.leader_id)),
+                                        'bg-green-100 text-green-800': command.link === item.image
+                                    }"
+									:title="authStore.role !== 'admin' && authStore.user?.id !== command?.leader_id ? 'Только лидер может совершать покупки' : ''"
 								>
 									{{ command.link === item.image ? 'Активен' : item.owned ? 'Куплен' : 'Купить' }}
 								</button>
@@ -198,6 +205,6 @@ onMounted(fetchCommand)
 			</div>
 		</div>
 
-		<div v-else class="text-gray-500">Данные команды не загружены</div>
+		<div v-else class="text-gray-500">Команда не создана преподавателем</div>
 	</div>
 </template>

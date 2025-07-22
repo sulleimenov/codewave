@@ -17,10 +17,10 @@ const topicId = route.params.topic_id
 
 onMounted(async () => {
 	// Redirect if role is not authorized
-	if (!['admin', 'teacher', 'student'].includes(authStore.role)) {
-		router.push(`/subjects/${subjectId}`)
-		return
-	}
+	// if (!['admin', 'teacher', 'student'].includes(authStore.role)) {
+	// 	router.push(`/subjects/${subjectId}`)
+	// 	return
+	// }
 
 	// Fetch profile if role is not set
 	if (!authStore.role) {
@@ -35,7 +35,7 @@ onMounted(async () => {
 
 	// Fetch lection content
 	try {
-		const response = await axios.get(`/subjects/${subjectId}/topic/${topicId}/lection_show`, {
+		const response = await axios.get(`api/subjects/${subjectId}/topic/${topicId}/lection_show`, {
 			headers: {
 				Authorization: `Bearer ${authStore.token}`
 			}
@@ -44,7 +44,7 @@ onMounted(async () => {
 		lectionTitle.value = response.data.title || 'Lection'
 	} catch (error) {
 		console.error('Error fetching lection content:', error)
-		lectionContent.value = 'Error loading lection.'
+		lectionContent.value = 'Лекции не обнаружено'
 	}
 })
 </script>
@@ -53,6 +53,6 @@ onMounted(async () => {
 	<div class="w-full rounded-lg shadow-1 px-8 py-7">
 		<h2 class="text-2xl font-bold mb-4">{{ lectionTitle }}</h2>
 		<LectionCreate v-if="authStore.isAdmin" :subjectId="subjectId" :topicId="topicId" />
-		<LectionShow v-else :content="lectionContent" />
+		<LectionShow :content="lectionContent" />
 	</div>
 </template>

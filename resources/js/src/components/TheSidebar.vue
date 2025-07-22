@@ -17,6 +17,7 @@ const isThemePage = computed(
 		route.name === 'homework_check' ||
 		route.name === 'lection_show' ||
 		route.name === 'lection_create' ||
+		route.name === 'lection' ||
 		route.name === 'Command' ||
 		route.name === 'command_create'
 )
@@ -93,7 +94,7 @@ const links = computed(() => {
 			// 	extraClass: completedStages.value['Домашнее задание'] ? '' : 'text-gray-400 saturate-0'
 			// },
 			{
-				to: 'lection_show',
+				to: 'lection',
 				icon: 'book.svg',
 				label: 'Лекция',
 				extraClass: completedStages.value['Лекция'] ? '' : 'text-gray-400 saturate-0'
