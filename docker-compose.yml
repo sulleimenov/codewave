@@ -41,8 +41,9 @@ services:
       - .:/var/www/html
     environment:
       - VIRTUAL_HOST=skillvera.kz
+      - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=skillvera.kz
-      - LETSENCRYPT_EMAIL=you@example.com
+      - LETSENCRYPT_EMAIL=yottestu@example.com
       - APP_ENV=local
       - APP_DEBUG=true
       - DB_HOST=mysql
