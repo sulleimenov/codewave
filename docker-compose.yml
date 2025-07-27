@@ -9,7 +9,7 @@ services:
       - '443:443'
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./certs:/etc/nginx/certs:ro
+      - ./certs:/etc/nginx/certs
       - ./vhost.d:/etc/nginx/vhost.d
       - ./html:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/custom.conf:ro
@@ -43,12 +43,12 @@ services:
       - VIRTUAL_HOST=skillvera.kz
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=skillvera.kz
-      - LETSENCRYPT_EMAIL=yottestu@example.com
+      - LETSENCRYPT_EMAIL=your-real-email@domain.com
       - APP_ENV=local
       - APP_DEBUG=true
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_DATABASE=laravel
+      - DB_DATABASE=college
       - DB_USERNAME=root
       - DB_PASSWORD=
     expose:
@@ -94,7 +94,7 @@ services:
     environment:
       - VIRTUAL_HOST=pma.skillvera.kz
       - LETSENCRYPT_HOST=pma.skillvera.kz
-      - LETSENCRYPT_EMAIL=you117@example.com
+      - LETSENCRYPT_EMAIL=sulleimenov@yandex.ru
       - PMA_HOST=mysql
       - PMA_USER=root
       - PMA_PASSWORD=
