@@ -12,12 +12,13 @@ const lectionTitle = ref('d')
 onMounted(async () => {
 	try {
 		const response = await axios.get(
-			`/api/subjects/${route.params.subject_id}/topic/${route.params.topic_id}/lection_show`,
-			{
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-				}
-			}
+			`/api/subjects/${route.params.subject_id}/topic/${route.params.topic_id}/lection_show`
+			// ,
+			// {
+			// 	headers: {
+			// 		Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+			// 	}
+			// }
 		)
 		markdownContent.value = response.data.markdown
 		lectionTitle.value = response.data.title || 'Lection'
