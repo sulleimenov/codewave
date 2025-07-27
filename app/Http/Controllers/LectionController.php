@@ -29,7 +29,7 @@ class LectionController extends Controller
         // Fetch the lection for the given subject_id and topic_id
         $lection = Lection::where('subject_id', $subject_id)
             ->where('topic_id', $topic_id)
-            ->where('user_id', Auth::id() ?? 1) // Restrict to authenticated user
+            // ->where('user_id', Auth::id() ?? 1) // Restrict to authenticated user
             ->firstOrFail();
 
         return response()->json([
